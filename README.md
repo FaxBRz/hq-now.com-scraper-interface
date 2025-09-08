@@ -2,6 +2,8 @@
 
 Um app pra baixar quadrinhos da internet feito com Node.js e Puppeteer. Fiz pra aprender web scraping.
 
+[Imagem do website](https://i.imgur.com/dIMX0jG.png)
+
 ## Aviso 
 
 Isso aqui é só pra estudar mesmo. Fiz pra:
