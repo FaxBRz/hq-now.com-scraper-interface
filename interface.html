@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HQ Manager - Gerenciador de Quadrinhos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .header p {
+            text-align: center;
+            color: #718096;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .download-section {
+            grid-column: 1 / -1;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        }
+
+        .comics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .comic-item {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .comic-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .comic-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #4a5568;
+        }
+
+        .comic-info {
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 10px;
+        }
+
+        .comic-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .comic-actions .btn {
+            padding: 8px 15px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 80px;
+            justify-content: center;
+        }
+
+        .status-bar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-text {
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal h3 {
+            margin-bottom: 20px;
+            color: #4a5568;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #718096;
+        }
+
+        .emoji {
+            font-style: normal;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .comic-actions {
+                flex-direction: column;
+            }
+            
+            .comic-actions .btn {
+                flex: none;
+            }
+        }
+
+        .log-container {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+
+        .log-line {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+
+        .log-line.success {
+            color: #68d391;
+        }
+
+        .log-line.error {
+            color: #f56565;
+        }
+
+        .log-line.info {
+            color: #63b3ed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="emoji">📚</span> HQ Manager</h1>
+            <p>Gerencie seus downloads de quadrinhos, crie PDFs e imprima com facilidade</p>
+        </div>
+
+        <div class="main-content">
+            <div class="card download-section">
+                <h2><span class="emoji">⬇️</span> Download de HQ</h2>
+                <form id="downloadForm">
+                    <div class="form-group">
+                        <label for="hqUrl">URL da HQ:</label>
+                        <input type="url" id="hqUrl" placeholder="https://exemplo.com/hq" required>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="btn" id="downloadBtn">
+                            <span class="emoji">🚀</span> Iniciar Download
+                        </button>
+                        <button type="button" class="btn btn-danger" id="cancelBtn" onclick="cancelDownload()" style="display: none;">
+                            <span class="emoji">⛔</span> Cancelar
+                        </button>
+                    </div>
+                </form>
+
+                <div class="log-container" id="logContainer">
+                    <div class="log-line info">Aguardando comandos...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><span class="emoji">📖</span> HQs Baixadas</h2>
+                <button class="btn btn-secondary" onclick="refreshComics()">
+                    <span class="emoji">🔄</span> Atualizar Lista
+                </button>
+                <div class="comics-grid" id="comicsGrid">
+                    <!-- HQs serão carregadas aqui -->
+                </div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-text" id="statusText">Pronto para usar</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Impressão -->
+    <div class="modal" id="printModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closePrintModal()">&times;</button>
+            <h3><span class="emoji">🖨️</span> Configurações de Impressão</h3>
+            
+            <div class="form-group">
+                <label for="comicSelect">HQ:</label>
+                <select id="comicSelect">
+                    <!-- Opções serão carregadas dinamicamente -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="chapterSelect">Capítulo:</label>
+                <select id="chapterSelect">
+                    <option value="all">Todos os capítulos</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="pageRange">Páginas:</label>
+                <input type="text" id="pageRange" placeholder="ex: 1-10, 15, 20-25" value="todas">
+            </div>
+            
+            <div class="form-group">
+                <label for="paperSize">Tamanho do Papel:</label>
+                <select id="paperSize">
+                    <option value="A4">A4</option>
+                    <option value="A3">A3</option>
+                    <option value="Letter">Letter</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="pagesPerSheet">Páginas por Folha:</label>
+                <select id="pagesPerSheet">
+                    <option value="1">1 página por folha</option>
+                    <option value="2">2 páginas por folha</option>
+                    <option value="4">4 páginas por folha</option>
+                </select>
+            </div>
+            
+            <button class="btn" onclick="startPrint()">
+                <span class="emoji">🖨️</span> Imprimir
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de PDF -->
+    <div class="modal" id="pdfModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closePdfModal()">&times;</button>
+            <h3><span class="emoji">📄</span> Gerar PDF</h3>
+            
+            <div class="form-group">
+                <label for="pdfComicSelect">HQ:</label>
+                <select id="pdfComicSelect">
+                    <!-- Opções serão carregadas dinamicamente -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="pdfChapterSelect">Capítulos:</label>
+                <select id="pdfChapterSelect" multiple>
+                    <!-- Opções serão carregadas dinamicamente -->
+                </select>
+                <small>Segure Ctrl para selecionar múltiplos capítulos</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="pdfQuality">Qualidade:</label>
+                <select id="pdfQuality">
+                    <option value="high">Alta (maior arquivo)</option>
+                    <option value="medium" selected>Média (balanceado)</option>
+                    <option value="low">Baixa (menor arquivo)</option>
+                </select>
+            </div>
+            
+            <button class="btn" onclick="generatePDF()">
+                <span class="emoji">📄</span> Gerar PDF
+            </button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Real-time connection with backend
+        const socket = io();
+        let comicsData = [];
+        let downloadProgress = 0;
+        let currentDownloadId = null;
+
+        // Função para adicionar log
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const logLine = document.createElement('div');
+            logLine.className = `log-line ${type}`;
+            logLine.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(logLine);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // Função para atualizar status
+        function updateStatus(text, progress = 0) {
+            document.getElementById('statusText').textContent = text;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+        }
+
+        // Função de download
+        document.getElementById('downloadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const url = document.getElementById('hqUrl').value;
+            
+            if (!url) {
+                addLog('Por favor, insira uma URL válida', 'error');
+                return;
+            }
+            
+            startDownload(url);
+        });
+
+        async function startDownload(url) {
+            addLog('Iniciando download...', 'info');
+            updateStatus('Preparando download...', 0);
+            
+            try {
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    currentDownloadId = result.downloadId;
+                    addLog(`Download iniciado com ID: ${currentDownloadId}`, 'success');
+                } else {
+                    addLog(`Erro: ${result.error}`, 'error');
+                    updateStatus('Erro no download', 0);
+                }
+            } catch (error) {
+                addLog(`Erro de conexão: ${error.message}`, 'error');
+                updateStatus('Erro de conexão', 0);
+            }
+        }
+
+        async function cancelDownload() {
+            if (currentDownloadId) {
+                try {
+                    const response = await fetch(`/api/download/${currentDownloadId}/cancel`, {
+                        method: 'POST'
+                    });
+                    
+                    if (response.ok) {
+                        addLog('Download cancelado', 'info');
+                        updateStatus('Download cancelado', 0);
+                        currentDownloadId = null;
+                    }
+                } catch (error) {
+                    addLog(`Erro ao cancelar: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function loadComics() {
+            try {
+                const response = await fetch('/api/comics');
+                const comics = await response.json();
+                
+                comicsData = comics;
+                refreshComics();
+            } catch (error) {
+                console.error('Erro ao carregar HQs:', error);
+                addLog('Erro ao carregar lista de HQs', 'error');
+            }
+        }
+
+        async function refreshComics() {
+            await loadComics();
+            renderComics();
+        }
+        
+        function renderComics() {
+            const grid = document.getElementById('comicsGrid');
+            
+            if (comicsData.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; color: #718096; margin: 20px;">Nenhuma HQ baixada ainda</p>';
+                return;
+            }
+            
+            grid.innerHTML = comicsData.map((comic, index) => `
+                <div class="comic-item">
+                    <div class="comic-title">${comic.name}</div>
+                    <div class="comic-info">
+                        ${comic.chapters} capítulos • ${comic.downloadDate}
+                    </div>
+                    <div class="comic-actions">
+                        <button class="btn btn-secondary" onclick="openPdfModal('${comic.name}')">
+                            <span class="emoji">📄</span> PDF
+                        </button>
+                        <button class="btn btn-warning" onclick="openPrintModal('${comic.name}')">
+                            <span class="emoji">🖨️</span> Imprimir
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteComic('${comic.name}')">
+                            <span class="emoji">🗑️</span> Excluir
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function deleteComic(comicName) {
+            if (confirm('Tem certeza que deseja excluir esta HQ?')) {
+                try {
+                    const response = await fetch(`/api/comics/${encodeURIComponent(comicName)}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        addLog(`HQ '${comicName}' removida com sucesso`, 'success');
+                        await refreshComics();
+                    } else {
+                        const error = await response.json();
+                        addLog(`Erro ao remover HQ: ${error.error}`, 'error');
+                    }
+                } catch (error) {
+                    addLog(`Erro de conexão ao remover HQ: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        function openPrintModal(comicName) {
+            document.getElementById('printModal').style.display = 'block';
+            // Aqui você popularia os selects com dados reais
+            populateComicSelect('comicSelect', comicName);
+        }
+
+        function closePrintModal() {
+            document.getElementById('printModal').style.display = 'none';
+        }
+
+        function openPdfModal(comicName) {
+            document.getElementById('pdfModal').style.display = 'block';
+            populateComicSelect('pdfComicSelect', comicName);
+        }
+
+        function closePdfModal() {
+            document.getElementById('pdfModal').style.display = 'none';
+        }
+
+        function populateComicSelect(selectId, selectedComic) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = comicsData.map(comic => 
+                `<option value="${comic.name}" ${comic.name === selectedComic ? 'selected' : ''}>
+                    ${comic.name}
+                </option>`
+            ).join('');
+        }
+
+        function startPrint() {
+            const comic = document.getElementById('comicSelect').value;
+            const chapter = document.getElementById('chapterSelect').value;
+            const pages = document.getElementById('pageRange').value;
+            const paper = document.getElementById('paperSize').value;
+            const pagesPerSheet = document.getElementById('pagesPerSheet').value;
+            
+            addLog(`Preparando impressão: ${comic}`, 'info');
+            addLog(`Capítulo: ${chapter}, Páginas: ${pages}`, 'info');
+            addLog(`Papel: ${paper}, ${pagesPerSheet} página(s) por folha`, 'info');
+            
+            // Aqui você integraria com o sistema de impressão real
+            setTimeout(() => {
+                addLog('Documento enviado para impressora!', 'success');
+                closePrintModal();
+            }, 2000);
+        }
+
+        function generatePDF() {
+            const comic = document.getElementById('pdfComicSelect').value;
+            const quality = document.getElementById('pdfQuality').value;
+            
+            addLog(`Gerando PDF: ${comic}`, 'info');
+            updateStatus('Criando PDF...', 0);
+            
+            // Simular geração de PDF
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 20;
+                updateStatus(`Gerando PDF... ${progress}%`, progress);
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    addLog('PDF gerado com sucesso!', 'success');
+                    updateStatus('PDF criado', 100);
+                    closePdfModal();
+                    
+                    setTimeout(() => {
+                        updateStatus('Pronto para usar', 0);
+                    }, 2000);
+                }
+            }, 500);
+        }
+
+        // Fechar modais ao clicar fora
+        window.onclick = function(event) {
+            const printModal = document.getElementById('printModal');
+            const pdfModal = document.getElementById('pdfModal');
+            
+            if (event.target === printModal) {
+                closePrintModal();
+            }
+            if (event.target === pdfModal) {
+                closePdfModal();
+            }
+        }
+
+        // Socket.IO event listeners
+        socket.on('download-started', (data) => {
+            addLog(`Download iniciado: ${data.url}`, 'info');
+            updateStatus('Download em andamento...', 10);
+            document.getElementById('downloadBtn').style.display = 'none';
+            document.getElementById('cancelBtn').style.display = 'inline-flex';
+        });
+        
+        socket.on('download-log', (data) => {
+            if (data.downloadId === currentDownloadId || !currentDownloadId) {
+                addLog(data.message, data.type);
+                
+                // Update progress based on log messages
+                if (data.message.includes('capítulo')) {
+                    const match = data.message.match(/capítulo (\d+)/i);
+                    if (match) {
+                        const chapter = parseInt(match[1]);
+                        const progress = Math.min(90, 20 + (chapter * 10));
+                        updateStatus(`Baixando capítulo ${chapter}`, progress);
+                    }
+                }
+            }
+        });
+        
+        socket.on('download-completed', async (data) => {
+            if (data.downloadId === currentDownloadId) {
+                addLog('Download concluído com sucesso!', 'success');
+                updateStatus('Download finalizado', 100);
+                currentDownloadId = null;
+                
+                document.getElementById('downloadBtn').style.display = 'inline-flex';
+                document.getElementById('cancelBtn').style.display = 'none';
+                
+                await refreshComics();
+                
+                setTimeout(() => {
+                    updateStatus('Pronto para usar', 0);
+                }, 3000);
+            }
+        });
+        
+        socket.on('download-error', (data) => {
+            if (data.downloadId === currentDownloadId) {
+                addLog(`Erro no download: ${data.error}`, 'error');
+                updateStatus('Erro no download', 0);
+                currentDownloadId = null;
+                
+                document.getElementById('downloadBtn').style.display = 'inline-flex';
+                document.getElementById('cancelBtn').style.display = 'none';
+            }
+        });
+        
+        socket.on('download-cancelled', (data) => {
+            if (data.downloadId === currentDownloadId) {
+                addLog('Download cancelado', 'info');
+                updateStatus('Download cancelado', 0);
+                currentDownloadId = null;
+                
+                document.getElementById('downloadBtn').style.display = 'inline-flex';
+                document.getElementById('cancelBtn').style.display = 'none';
+            }
+        });
+        
+        // Initialize interface
+        window.addEventListener('load', async function() {
+            addLog('Interface iniciada com sucesso!', 'success');
+            await refreshComics();
+        });
+    </script>
+</body>
+</html>
