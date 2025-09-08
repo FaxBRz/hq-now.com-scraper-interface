@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { Server } = require('socket.io');
 const http = require('http');
-const HQDownloader = require('./index');
+const HQDownloaderFast = require('./scraper');
 
 const app = express();
 const server = http.createServer(app);
@@ -54,11 +54,27 @@ app.get('/api/comics', (req, res) => {
                     
                     if (chapters > 0) {
                         const stats = fs.statSync(comicPath);
+                        
+                        // Verifica se tem arquivo de progresso (download incompleto)
+                        const progressFile = path.join(comicPath, '.progress.json');
+                        let progressInfo = null;
+                        
+                        if (fs.existsSync(progressFile)) {
+                            try {
+                                const progressData = fs.readFileSync(progressFile, 'utf8');
+                                progressInfo = JSON.parse(progressData);
+                            } catch (error) {
+                                console.error('Erro ao ler progresso:', error);
+                            }
+                        }
+                        
                         comics.push({
                             name: item.name,
                             chapters: chapters,
                             downloadDate: stats.mtime.toLocaleDateString('pt-BR'),
-                            path: comicPath
+                            path: comicPath,
+                            hasProgress: !!progressInfo,
+                            progress: progressInfo
                         });
                     }
                 } catch (error) {
@@ -74,9 +90,79 @@ app.get('/api/comics', (req, res) => {
     }
 });
 
+// Resume download
+app.post('/api/resume/:name', async (req, res) => {
+    const comicName = req.params.name;
+    const comicPath = path.join(process.cwd(), comicName);
+    const progressFile = path.join(comicPath, '.progress.json');
+    
+    if (!fs.existsSync(progressFile)) {
+        return res.status(404).json({ error: 'Nenhum download pendente encontrado' });
+    }
+    
+    try {
+        const progressData = fs.readFileSync(progressFile, 'utf8');
+        const progress = JSON.parse(progressData);
+        const url = progress.url;
+        
+        if (!url) {
+            return res.status(400).json({ error: 'URL não encontrada no arquivo de progresso' });
+        }
+        
+        const downloadId = Date.now().toString();
+        
+        // Usa configurações salvas no progresso ou padrões
+        const downloaderOptions = {
+            maxConcurrentChapters: progress.options?.maxConcurrentChapters || 5,
+            maxConcurrentImages: progress.options?.maxConcurrentImages || 15,
+            pageTimeout: progress.options?.pageTimeout || 8000,
+            requestTimeout: progress.options?.requestTimeout || 20000
+        };
+        
+        console.log(`Continuando download com configurações:`, downloaderOptions);
+        
+        const downloader = new HQDownloaderFast(downloaderOptions);
+        activeDownloads.set(downloadId, downloader);
+        
+        io.emit('download-started', { downloadId, url, resumed: true });
+        
+        const originalConsoleLog = console.log;
+        console.log = (message) => {
+            originalConsoleLog(message);
+            io.emit('download-log', { downloadId, message, type: 'info' });
+        };
+        
+        const originalConsoleError = console.error;
+        console.error = (message) => {
+            originalConsoleError(message);
+            io.emit('download-log', { downloadId, message, type: 'error' });
+        };
+        
+        downloader.main(url).then(() => {
+            console.log = originalConsoleLog;
+            console.error = originalConsoleError;
+            
+            activeDownloads.delete(downloadId);
+            io.emit('download-completed', { downloadId });
+        }).catch((error) => {
+            console.log = originalConsoleLog;
+            console.error = originalConsoleError;
+            
+            activeDownloads.delete(downloadId);
+            io.emit('download-error', { downloadId, error: error.message });
+        });
+        
+        res.json({ downloadId, status: 'resumed' });
+        
+    } catch (error) {
+        console.error('Error resuming download:', error);
+        res.status(500).json({ error: 'Erro ao continuar download' });
+    }
+});
+
 // Start download
 app.post('/api/download', async (req, res) => {
-    const { url } = req.body;
+    const { url, options } = req.body;
     
     if (!url) {
         return res.status(400).json({ error: 'URL is required' });
@@ -85,7 +171,17 @@ app.post('/api/download', async (req, res) => {
     const downloadId = Date.now().toString();
     
     try {
-        const downloader = new HQDownloader();
+        // Usa as configurações personalizadas ou padrões
+        const downloaderOptions = {
+            maxConcurrentChapters: options?.maxConcurrentChapters || 5,
+            maxConcurrentImages: options?.maxConcurrentImages || 15,
+            pageTimeout: options?.pageTimeout || 8000,
+            requestTimeout: options?.requestTimeout || 20000
+        };
+        
+        console.log(`Iniciando download com configurações:`, downloaderOptions);
+        
+        const downloader = new HQDownloaderFast(downloaderOptions);
         activeDownloads.set(downloadId, downloader);
         
         // Emit download started

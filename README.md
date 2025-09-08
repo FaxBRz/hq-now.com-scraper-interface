@@ -1,31 +1,31 @@
-# Baixador de HQs
+# 📚 Baixador de HQs
 
-Um app pra baixar quadrinhos da internet feito com Node.js e Puppeteer. Fiz pra aprender web scraping.
+Um app pra baixar quadrinhos da internet feito com Node.js e Puppeteer. Fiz pra aprender web scraping. 🚀
 
 ![Imagem do website](https://i.imgur.com/dIMX0jG.png)
 
-## Aviso 
+## ⚠️ Aviso 
 
 Isso aqui é só pra estudar mesmo. Fiz pra:
 
-- Aprender como usar o Puppeteer
-- Entender como funciona web scraping
-- Treinar desenvolvimento com Node.js
-- Brincar com Socket.IO
+- 🎓 Aprender como usar o Puppeteer
+- 🔍 Entender como funciona web scraping
+- 💻 Treinar desenvolvimento com Node.js
+- 🔌 Brincar com Socket.IO
 
 **Use com responsabilidade:**
-- Só em sites que permitem
-- Respeita os termos de uso
-- Não sobrecarrega os servidores
-- É só pra aprender
+- ✅ Só em sites que permitem
+- 📋 Respeita os termos de uso
+- 🚫 Não sobrecarrega os servidores
+- 🎯 É só pra aprender
 
-## Como usar
+## 🚀 Como usar
 
-### Você precisa ter:
-- Node.js 18+ (recomendo a versão 20 LTS)
-- NPM ou Yarn
+### 📋 Você precisa ter:
+- 🟢 Node.js 18+ (recomendo a versão 20 LTS)
+- 📦 NPM ou Yarn
 
-### Instalar
+### 💾 Instalar
 
 ```bash
 # Baixa o projeto
@@ -42,64 +42,67 @@ npm install
 npx puppeteer browsers install chrome
 ```
 
-### Rodar
+### ▶️ Rodar
 
-**Interface web (mais fácil):**
+**🌐 Interface web (mais fácil):**
 ```bash
 npm start
 ```
 Abre no http://localhost:3000
 
-**Só o script (linha de comando):**
+**⌨️ Só o script (linha de comando):**
 ```bash
-# Versão normal
-node index.js <url-da-hq>
-
-# Versão mais rápida
-npm run scraper:fast <url-da-hq>
-
-# Versão turbo (bem mais rápida)
-npm run scraper:turbo <url-da-hq>
+# Script direto
+npm run scraper <url-da-hq>
 ```
 
-A versão fast é uns 3x mais rápida e a turbo é tipo 5x.
+🚀 **Recomendado:** Use a interface web que tem configurações de velocidade otimizadas!
 
-## Como funciona
+## ⚙️ Como funciona
 
-### Arquivos principais
+### 📁 Arquivos principais
 
-- `index.js` - O script que faz o download (versão normal)
-- `index-fast.js` - Versão otimizada que baixa várias coisas ao mesmo tempo
-- `server.js` - Servidor web com API
-- `interface.html` - A tela bonita pra usar no navegador
+- `scraper.js` - 🤖 Motor de download otimizado com Puppeteer
+- `server.js` - 🖥️ Servidor web com API REST e Socket.IO
+- `interface.html` - 🎨 Interface web moderna com configurações de velocidade
 
-### O que faz
+### ✨ O que faz
 
-- Interface web pra não ficar digitando comando
-- Baixa vários capítulos ao mesmo tempo
-- Mostra o progresso em tempo real
-- Pode cancelar o download
-- Continua de onde parou se der erro
-- Organiza tudo em pastas
+- 🌐 Interface web moderna pra não ficar digitando comando
+- ⚡ Baixa vários capítulos ao mesmo tempo (concorrência configurável)
+- 📊 Mostra o progresso em tempo real com Socket.IO
+- ⏹️ Pode cancelar downloads em andamento
+- 🔄 Continua de onde parou se der erro (resume automático)
+- 📂 Organiza tudo em pastas estruturadas
+- 🗑️ Gerencia biblioteca de HQs com opção de deletar
 
-## Otimizações
+## 🚀 Modos de Velocidade
 
-A versão fast baixa mais rápido porque:
+A interface web oferece diferentes modos de velocidade:
 
-- Processa 5 capítulos ao mesmo tempo (em vez de um por vez)
-- Baixa 15 imagens juntas (em batches)
-- Não carrega CSS, imagens e outras firulas desnecessárias
-- Timeouts menores pra não ficar esperando muito
-- Se uma imagem falhar, continua com as outras
+- 🐌 **Conservador**: 3 capítulos, 10 imagens (conexões lentas)
+- ⚖️ **Balanceado**: 5 capítulos, 15 imagens (padrão recomendado)
+- 🚀 **Rápido**: 8 capítulos, 20 imagens (conexões boas)
+- ⚡ **Turbo**: 12 capítulos, 30 imagens (máxima velocidade)
+- 🔧 **Personalizado**: Configure do seu jeito
 
-### Configurar performance
+**Por que é rápido:**
+- 🔄 Processa múltiplos capítulos simultaneamente
+- 📦 Baixa imagens em batches otimizados
+- 🚫 Bloqueia recursos desnecessários (CSS, fonts, etc.)
+- ⏱️ Timeouts otimizados para navegação rápida
+- 💪 Recuperação automática de falhas
+
+### ⚙️ Configurar performance
+
+Use a interface web para configurar ou:
 
 ```bash
-# Customizar quantos capítulos e imagens baixar junto
-MAX_CHAPTERS=8 MAX_IMAGES=20 node index-fast.js <url>
+# Variáveis de ambiente para tuning avançado
+MAX_CHAPTERS=8 MAX_IMAGES=20 npm run scraper <url>
 ```
 
-## Estrutura dos arquivos
+## 📂 Estrutura dos arquivos
 
 ```
 nome-da-hq/
@@ -111,7 +114,7 @@ nome-da-hq/
 │   └── ...
 ```
 
-## Desenvolvimento
+## 👨‍💻 Desenvolvimento
 
 ```bash
 # Roda com auto-restart
@@ -121,24 +124,51 @@ npm run dev
 npm run scraper <url>
 ```
 
-## Licença
+## 📄 Licença
 
-GPL-3.0 - Basicamente você pode usar, modificar e compartilhar, mas tem que manter o código aberto.
+📜 GPL-3.0 - Basicamente você pode usar, modificar e compartilhar, mas tem que manter o código aberto.
 
-## Tecnologias usadas
+## 🛠️ Tecnologias usadas
 
-- Node.js - Runtime JavaScript
-- Puppeteer - Controla o navegador
-- Express - Servidor web
-- Socket.IO - Comunicação em tempo real
-- HTML/CSS/JS - Interface web
+- 🟢 **Node.js** - Runtime JavaScript
+- 🎭 **Puppeteer** - Controla o navegador
+- 🚂 **Express** - Servidor web
+- 🔌 **Socket.IO** - Comunicação em tempo real
+- 🌐 **HTML/CSS/JS** - Interface web moderna
 
-## Links úteis
+## 🔗 Links úteis
 
-- [Node.js](https://nodejs.org/)
-- [Puppeteer](https://pptr.dev/)
-- [Como fazer web scraping ético](https://blog.apify.com/is-web-scraping-legal/)
+- 🟢 [Node.js](https://nodejs.org/)
+- 🎭 [Puppeteer](https://pptr.dev/)
+- 📚 [Como fazer web scraping ético](https://blog.apify.com/is-web-scraping-legal/)
+
+## 📝 TODO - Próximas Features
+
+### 🌍 Suporte a Outros Sites
+Planos para expandir o suporte além do site atual:
+
+- 📖 **MangáLivre** - Suporte para mangás brasileiros
+- 🦸 **Comic Book Plus** - HQs clássicas em domínio público
+- 📚 **Webtoons** - Manhwas e webtoons verticais
+- 🇯🇵 **MangaDex** - Biblioteca internacional de mangás
+- 🏴‍☠️ **Archive.org** - HQs históricas e clássicas
+
+### 🚀 Melhorias Técnicas
+- 🔧 Sistema de plugins para sites personalizados
+- 📱 Interface mobile responsiva
+- 🗂️ Exportação para formatos CBR/CBZ
+- 🔍 Sistema de busca e filtros
+- 📊 Estatísticas de download
+- 🎨 Leitor integrado de HQs
+
+### 🛡️ Recursos Defensivos
+- 🕰️ Rate limiting inteligente
+- 🔄 Retry automático com backoff
+- 👻 Rotação de user agents
+- 🛡️ Detecção de anti-bot e contornos éticos
+
+**Contribuições são bem-vindas!** 🤝
 
 ---
 
-Feito por diversão e aprendizado. Use com responsabilidade.
+❤️ Feito por diversão e aprendizado. Use com responsabilidade! 🚀

@@ -320,9 +320,51 @@
                         <label for="hqUrl">URL da HQ:</label>
                         <input type="url" id="hqUrl" placeholder="https://exemplo.com/hq" required>
                     </div>
+                    
+                    <div class="form-group">
+                        <label for="speedPreset">Configuração de Velocidade:</label>
+                        <select id="speedPreset" onchange="applyPreset()">
+                            <option value="conservative">🐌 Conservador (3 caps, 10 imgs)</option>
+                            <option value="balanced" selected>⚖️ Balanceado (5 caps, 15 imgs)</option>
+                            <option value="fast">🚀 Rápido (8 caps, 20 imgs)</option>
+                            <option value="turbo">⚡ Turbo (12 caps, 30 imgs)</option>
+                            <option value="custom">🔧 Personalizado</option>
+                        </select>
+                    </div>
+                    
+                    <div id="customSettings" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div class="form-group">
+                                <label for="maxChapters">Capítulos simultâneos:</label>
+                                <select id="maxChapters">
+                                    <option value="3">3</option>
+                                    <option value="5" selected>5</option>
+                                    <option value="8">8</option>
+                                    <option value="12">12</option>
+                                    <option value="15">15</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="maxImages">Imagens simultâneas:</label>
+                                <select id="maxImages">
+                                    <option value="10">10</option>
+                                    <option value="15" selected>15</option>
+                                    <option value="20">20</option>
+                                    <option value="30">30</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="presetInfo" style="background: #f7fafc; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; color: #4a5568;">
+                        <strong>Modo Balanceado:</strong> Configuração padrão que funciona bem na maioria das situações. 
+                        Processa 5 capítulos simultâneos com 15 imagens por vez.
+                    </div>
+                    
                     <div style="display: flex; gap: 10px;">
                         <button type="submit" class="btn" id="downloadBtn">
-                            <span class="emoji">🚀</span> Iniciar Download
+                            <span class="emoji">🚀</span> Download Rápido
                         </button>
                         <button type="button" class="btn btn-danger" id="cancelBtn" onclick="cancelDownload()" style="display: none;">
                             <span class="emoji">⛔</span> Cancelar
@@ -476,8 +518,76 @@
             startDownload(url);
         });
 
+        function applyPreset() {
+            const preset = document.getElementById('speedPreset').value;
+            const customSettings = document.getElementById('customSettings');
+            const maxChapters = document.getElementById('maxChapters');
+            const maxImages = document.getElementById('maxImages');
+            const presetInfo = document.getElementById('presetInfo');
+            
+            if (preset === 'custom') {
+                customSettings.style.display = 'block';
+                presetInfo.innerHTML = '<strong>Modo Personalizado:</strong> Configure manualmente quantos capítulos e imagens baixar simultaneamente. Valores altos podem sobrecarregar o servidor.';
+                return;
+            } else {
+                customSettings.style.display = 'none';
+            }
+            
+            const presets = {
+                conservative: { 
+                    chapters: 3, 
+                    images: 10,
+                    info: '<strong>Modo Conservador:</strong> Configuração mais lenta e gentil com o servidor. Ideal para conexões instáveis ou sites com limitações.'
+                },
+                balanced: { 
+                    chapters: 5, 
+                    images: 15,
+                    info: '<strong>Modo Balanceado:</strong> Configuração padrão que funciona bem na maioria das situações. Processa 5 capítulos simultâneos com 15 imagens por vez.'
+                },
+                fast: { 
+                    chapters: 8, 
+                    images: 20,
+                    info: '<strong>Modo Rápido:</strong> Configuração agressiva para conexões boas. Pode ser 2-3x mais rápido que o balanceado.'
+                },
+                turbo: { 
+                    chapters: 12, 
+                    images: 30,
+                    info: '<strong>Modo Turbo:</strong> Configuração máxima para conexões excelentes. Use com cuidado - pode sobrecarregar alguns servidores.'
+                }
+            };
+            
+            if (presets[preset]) {
+                maxChapters.value = presets[preset].chapters;
+                maxImages.value = presets[preset].images;
+                presetInfo.innerHTML = presets[preset].info;
+            }
+        }
+
+        function getDownloadSettings() {
+            const preset = document.getElementById('speedPreset').value;
+            
+            if (preset === 'custom') {
+                return {
+                    maxConcurrentChapters: parseInt(document.getElementById('maxChapters').value),
+                    maxConcurrentImages: parseInt(document.getElementById('maxImages').value)
+                };
+            }
+            
+            const presets = {
+                conservative: { maxConcurrentChapters: 3, maxConcurrentImages: 10 },
+                balanced: { maxConcurrentChapters: 5, maxConcurrentImages: 15 },
+                fast: { maxConcurrentChapters: 8, maxConcurrentImages: 20 },
+                turbo: { maxConcurrentChapters: 12, maxConcurrentImages: 30 }
+            };
+            
+            return presets[preset] || presets.balanced;
+        }
+
         async function startDownload(url) {
-            addLog('Iniciando download...', 'info');
+            const settings = getDownloadSettings();
+            
+            addLog('Iniciando download rápido...', 'info');
+            addLog(`Configurações: ${settings.maxConcurrentChapters} capítulos, ${settings.maxConcurrentImages} imagens simultâneas`, 'info');
             updateStatus('Preparando download...', 0);
             
             try {
@@ -486,7 +596,10 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ url })
+                    body: JSON.stringify({ 
+                        url,
+                        options: settings
+                    })
                 });
                 
                 const result = await response.json();
@@ -548,25 +661,63 @@
                 return;
             }
             
-            grid.innerHTML = comicsData.map((comic, index) => `
-                <div class="comic-item">
-                    <div class="comic-title">${comic.name}</div>
-                    <div class="comic-info">
-                        ${comic.chapters} capítulos • ${comic.downloadDate}
+            grid.innerHTML = comicsData.map((comic, index) => {
+                const progressText = comic.hasProgress ? 
+                    `${comic.progress.completedChapters.length}/${comic.progress.totalChapters} capítulos • Incompleto` : 
+                    `${comic.chapters} capítulos • ${comic.downloadDate}`;
+                    
+                const resumeButton = comic.hasProgress ? 
+                    `<button class="btn" onclick="resumeDownload('${comic.name}')" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+                        <span class="emoji">⏯️</span> Continuar
+                    </button>` : '';
+                    
+                return `
+                    <div class="comic-item" ${comic.hasProgress ? 'style="border-left: 4px solid #48bb78;"' : ''}>
+                        <div class="comic-title">${comic.name}${comic.hasProgress ? ' ⏸️' : ''}</div>
+                        <div class="comic-info">
+                            ${progressText}
+                        </div>
+                        <div class="comic-actions">
+                            ${resumeButton}
+                            ${!comic.hasProgress ? `
+                                <button class="btn btn-secondary" onclick="openPdfModal('${comic.name}')">
+                                    <span class="emoji">📄</span> PDF
+                                </button>
+                                <button class="btn btn-warning" onclick="openPrintModal('${comic.name}')">
+                                    <span class="emoji">🖨️</span> Imprimir
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-danger" onclick="deleteComic('${comic.name}')">
+                                <span class="emoji">🗑️</span> Excluir
+                            </button>
+                        </div>
                     </div>
-                    <div class="comic-actions">
-                        <button class="btn btn-secondary" onclick="openPdfModal('${comic.name}')">
-                            <span class="emoji">📄</span> PDF
-                        </button>
-                        <button class="btn btn-warning" onclick="openPrintModal('${comic.name}')">
-                            <span class="emoji">🖨️</span> Imprimir
-                        </button>
-                        <button class="btn btn-danger" onclick="deleteComic('${comic.name}')">
-                            <span class="emoji">🗑️</span> Excluir
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+        }
+
+        async function resumeDownload(comicName) {
+            if (currentDownloadId) {
+                addLog('Já existe um download em andamento', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/resume/${encodeURIComponent(comicName)}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    currentDownloadId = result.downloadId;
+                    addLog(`Continuando download de '${comicName}'...`, 'success');
+                } else {
+                    addLog(`Erro: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Erro de conexão: ${error.message}`, 'error');
+            }
         }
 
         async function deleteComic(comicName) {
@@ -676,7 +827,10 @@
 
         // Socket.IO event listeners
         socket.on('download-started', (data) => {
-            addLog(`Download iniciado: ${data.url}`, 'info');
+            const message = data.resumed ? 
+                `Continuando download: ${data.url}` : 
+                `Download iniciado: ${data.url}`;
+            addLog(message, 'info');
             updateStatus('Download em andamento...', 10);
             document.getElementById('downloadBtn').style.display = 'none';
             document.getElementById('cancelBtn').style.display = 'inline-flex';

@@ -2,13 +2,11 @@
   "name": "hq-downloader",
   "version": "1.0.0",
   "description": "Comic book downloader with web interface",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "scraper": "node index.js",
-    "scraper:fast": "node index-fast.js",
-    "scraper:turbo": "MAX_CHAPTERS=8 MAX_IMAGES=20 node index-fast.js",
+    "scraper": "node scraper.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": ["comic", "downloader", "scraper", "puppeteer", "hq"],
